@@ -4,48 +4,36 @@ const findType = value =>
     .match(/\s([a-zA-Z]+)/)[1]
     .toLowerCase());
 
-const add = (db, opts) => (key, value) => {
+const add = db => async (key, value) => {
   const type = findType(value);
   if (type === "string") return db.set(key, value);
   else if (type === "object") return db.hset(key, value);
   else if (type === "array") return db.hset(key, ...value);
-  else {
-    if (opts.debug)
-      throw TypeError(`The function add have a value with wrong type: ${type}`);
-    else return false;
-  }
+  else return false;
 };
 
-const get = (db, opts) => (key, value) => {
+const get = db => async (key, value) => {
   const type = findType(value);
   if (type === "array") return db.hmget(key, value);
   else if (type === "string") return db.get(key);
-  else {
-    if (opts.debug)
-      throw TypeError(`The function get have a value with wrong type: ${type}`);
-    else return false;
-  }
+  else return false;
 };
-const remove = (db, opts) => (key, value) => {
+
+const remove = db => async (key, value) => {
   const type = findType(value);
   if (type === "array") return db.hdel(key, value);
   else if (type === "string") return db.del(key);
-  else {
-    if (opts.debug)
-      throw TypeError(
-        `The function remove have a value with wrong type: ${type}`
-      );
-    else return false;
-  }
+  else return false;
 };
-const contains = (db, opts) => key => db.exists(key);
 
-const adapter = (db, opts = { debug: true }) => {
+const contains = db => async key => db.exists(key);
+
+const adapter = db => {
   return {
-    add: add(db, opts),
-    get: get(db, opts),
-    remove: remove(db, opts),
-    contains: contains(db, opts)
+    add: add(db),
+    get: get(db),
+    remove: remove(db),
+    contains: contains(db)
   };
 };
 
