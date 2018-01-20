@@ -4,11 +4,10 @@ const findType = value =>
     .match(/\s([a-zA-Z]+)/)[1]
     .toLowerCase());
 
-const add = db => async (key, value) => {
+const set = db => async (key, value) => {
   const type = findType(value);
   if (type === "string") return db.set(key, value);
   else if (type === "object") return db.hset(key, value);
-  else if (type === "array") return db.hset(key, ...value);
   else return false;
 };
 
@@ -26,14 +25,14 @@ const remove = db => async (key, value) => {
   else return false;
 };
 
-const contains = db => async key => db.exists(key);
+const has = db => async key => db.exists(key);
 
 const adapter = db => {
   return {
-    add: add(db),
+    set: set(db),
     get: get(db),
-    remove: remove(db),
-    contains: contains(db)
+    has: has(db),
+    remove: remove(db)
   };
 };
 
